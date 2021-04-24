@@ -4,27 +4,24 @@
 
 #define LOGGING 0
 
-void process_primes(int, int);
+void process_primes(int);
 
 
-void start_child_process(int fd, int alive_fd) {
+void start_child_process(int fd) {
 	int pid = fork();
-	if (0 == pid) {
+	if (0 != pid) {
 		return;
 	}
-	process_primes(fd, alive_fd);
+	process_primes(fd);
 }
 
 
-void process_primes(int fd, int alive_fd) {
+void process_primes(int fd) {
 	int num = 0, p = 0;
 	int numbers_pipe[2] =  {} ;
-	int alive_pipe[2] = {};
 	int status = 0;
 	char first_num = 1;
 
-	pipe(numbers_pipe);
-	start_child_process(numbers_pipe[0], alive_pipe[1]);
 
 	while (1) {
 		if (4 !=  (status = read(fd, &num, 4))) {
@@ -32,13 +29,16 @@ void process_primes(int fd, int alive_fd) {
 				break;
 			}
 			close(numbers_pipe[1]);
-			close(alive_pipe[0]);
-			close(alive_fd);
 			close(fd);
+			if (-1 == wait(NULL)) {printf("whattttt???");}
+
+
 			exit(1);
 		}
 	
 		if (first_num) {
+			pipe(numbers_pipe);
+			start_child_process(numbers_pipe[0]);
 			first_num = 0;
 			p = num;
 			printf("prime %d\n", p);
@@ -52,11 +52,9 @@ void process_primes(int fd, int alive_fd) {
 			write(numbers_pipe[1], &num, 4);
 		}
 	}
-	read(alive_pipe[0], &num, 4);
-	close(numbers_pipe[1]);
-	close(alive_pipe[0]);
-	close(alive_fd);
 	close(fd);
+	close(numbers_pipe[1]);
+	if (-1 == wait(NULL)) {printf("1111whattttt???");}
 	exit(0);
 
 }
@@ -66,10 +64,11 @@ int
 main(int argc, char *argv[]) {
 	int i = 0;
 	int numbers_pipe[2];
-	int alive_pipe[2];
-	pipe(alive_pipe);
+	
 	pipe(numbers_pipe);
-	start_child_process(numbers_pipe[0], alive_pipe[1]);
+	
+	start_child_process(numbers_pipe[0]);
+	
 	for (i = 2; i <= MAX_N; i++) {
 #if LOGGING
 		printf("2 - Sending to child %d\n", i); 
@@ -77,8 +76,8 @@ main(int argc, char *argv[]) {
 		write(numbers_pipe[1], &i, 4);
 	}
 	close(numbers_pipe[1]);
-	read(alive_pipe[0], &argc, 4);
-	close(alive_pipe[0]);
+	if (-1 == wait(NULL)) {printf("2222whattttt???");}
+	printf("Everyone finished!!\n");
 	exit(0);
 
 
