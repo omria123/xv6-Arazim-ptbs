@@ -8,6 +8,7 @@
 
 struct cpu cpus[NCPU];
 
+int proc_count = 0;
 struct proc proc[NPROC];
 
 struct proc *initproc;
@@ -112,6 +113,9 @@ found:
     release(&p->lock);
     return 0;
   }
+  
+  proc_count++;
+
 
   // An empty user page table.
   p->pagetable = proc_pagetable(p);
@@ -136,6 +140,8 @@ found:
 static void
 freeproc(struct proc *p)
 {
+  proc_count--;
+
   if(p->trapframe)
     kfree((void*)p->trapframe);
   p->trapframe = 0;

@@ -60,6 +60,7 @@ void            ramdiskintr(void);
 void            ramdiskrw(struct buf*);
 
 // kalloc.c
+extern int      free_bytes;
 void*           kalloc(void);
 void            kfree(void *);
 void            kinit(void);
