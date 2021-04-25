@@ -6,6 +6,8 @@
 #include "defs.h"
 #include "fs.h"
 
+ 
+
 /*
  * the kernel's page table.
  */
@@ -439,4 +441,36 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
   } else {
     return -1;
   }
+}
+
+
+void intedentprint(unsigned int d) {
+	int i;
+	if (d == 0) return;
+	printf("..");
+	for (i = 1; i < d; i++) printf(" ..");
+}
+
+
+void enprint(pte_t *pte, int depth) {
+	int i = 0;
+	uint64 pte_value;
+	if (depth == PT_DEPTH) return;
+
+	for (; i < PD_SIZE; i++) {
+		pte_value = *pte;
+		if (pte_value & PTE_V) {
+			intedentprint(depth + 1);
+			printf("%d: pte %p pa %p\n", i, pte_value, PTE2PA(pte_value)); 
+			enprint((pte_t *) PTE2PA(pte_value), depth+1);	
+		}
+		pte++;
+	}
+}
+
+void
+vmprint(pagetable_t pt) {
+	printf("page table %p\n", pt);
+	enprint(pt, 0);
+	return;
 }

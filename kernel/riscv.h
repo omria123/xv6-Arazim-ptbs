@@ -322,6 +322,9 @@ sfence_vma()
 
 #define PGSIZE 4096 // bytes per page
 #define PGSHIFT 12  // bits of offset within a page
+#define PD_SIZE 512
+#define PT_DEPTH 3
+
 
 #define PGROUNDUP(sz)  (((sz)+PGSIZE-1) & ~(PGSIZE-1))
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE-1))
@@ -349,6 +352,7 @@ sfence_vma()
 // Sv39, to avoid having to sign-extend virtual addresses
 // that have the high bit set.
 #define MAXVA (1L << (9 + 9 + 9 + 12 - 1))
+
 
 typedef uint64 pte_t;
 typedef uint64 *pagetable_t; // 512 PTEs
